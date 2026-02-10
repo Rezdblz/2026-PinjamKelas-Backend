@@ -22,7 +22,8 @@ builder.Services.AddOpenApi();
 
 // Register DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString)
+           .UseSnakeCaseNamingConvention());
 
 // Register Swagger
 builder.Services.AddEndpointsApiExplorer();
