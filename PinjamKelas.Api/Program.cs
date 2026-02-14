@@ -26,6 +26,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString)
            .UseSnakeCaseNamingConvention());
 
+// Register Controllers (ADD THIS)
+builder.Services.AddControllers();
+
 // Register Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -49,8 +52,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// Map Controllers (ADD THIS)
+app.MapControllers();
 
 var summaries = new[]
 {
