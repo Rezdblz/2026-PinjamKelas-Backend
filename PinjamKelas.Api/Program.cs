@@ -32,7 +32,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Seeding (MOVED HERE - after app.Build())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -43,6 +42,8 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     app.MapOpenApi();
 }
 
