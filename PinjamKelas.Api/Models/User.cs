@@ -6,10 +6,10 @@ namespace PinjamKelas.Api.Models
     public class User
     {
         public int Id { get; set; }
-        public string Username { get; set; }
-        public string Role { get; set; }
+        public required string Username { get; set; }
+        public required string Role { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public ICollection<Post> Posts { get; set; }
+        public ICollection<Post>? Posts { get; set; }
     }
 }

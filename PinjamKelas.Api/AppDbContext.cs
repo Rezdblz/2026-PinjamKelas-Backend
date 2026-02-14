@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using PinjamKelas.Api.Models;
 
-namespace PinjamKelas.Api
+namespace PinjamKelas.Api.Models
 {
     public class AppDbContext : DbContext
     {
@@ -14,23 +13,58 @@ namespace PinjamKelas.Api
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // User-Post
-            modelBuilder.Entity<Post>()
-                .HasOne(p => p.User)
-                .WithMany(u => u.Posts)
-                .HasForeignKey(p => p.IdUsers);
+            // User
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("users");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Username).IsRequired();
+                entity.Property(e => e.Role).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+            });
 
-            // Classroom-Post
-            modelBuilder.Entity<Post>()
-                .HasOne(p => p.Classroom)
-                .WithMany(c => c.Posts)
-                .HasForeignKey(p => p.IdClassroom);
+            // Classroom
+            modelBuilder.Entity<Classroom>(entity =>
+            {
+                entity.ToTable("classroom");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ClassName).IsRequired();
+                entity.Property(e => e.Status).IsRequired();
+            });
 
-            // Classroom-StatusLog
-            modelBuilder.Entity<StatusLog>()
-                .HasOne(s => s.Classroom)
-                .WithMany(c => c.StatusLogs)
-                .HasForeignKey(s => s.IdClassroom);
+            // Post
+            modelBuilder.Entity<Post>(entity =>
+            {
+                entity.ToTable("posts");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Title).IsRequired();
+                entity.Property(e => e.Description);
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.Property(e => e.StartTime).IsRequired();
+                entity.Property(e => e.EndTime).IsRequired();
+
+                entity.HasOne(e => e.User)
+                      .WithMany(u => u.Posts)
+                      .HasForeignKey(e => e.IdUsers);
+
+                entity.HasOne(e => e.Classroom)
+                      .WithMany(c => c.Posts)
+                      .HasForeignKey(e => e.IdClassroom);
+            });
+
+            // StatusLog
+            modelBuilder.Entity<StatusLog>(entity =>
+            {
+                entity.ToTable("status_log");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Description);
+                entity.Property(e => e.LogTime).IsRequired();
+
+                entity.HasOne(e => e.Classroom)
+                      .WithMany(c => c.StatusLogs)
+                      .HasForeignKey(e => e.IdClassroom);
+            });
         }
     }
 }
