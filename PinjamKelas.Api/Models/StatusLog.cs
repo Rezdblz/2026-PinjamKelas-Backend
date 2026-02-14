@@ -2,9 +2,8 @@ using System;
 
 namespace PinjamKelas.Api.Models
 {
-    public class StatusLog
+    public class StatusLog : BaseEntity
     {
-        public int Id { get; set; }
         public int IdClassroom { get; set; }
         public string? Description { get; set; }
         public DateTime LogTime { get; set; }

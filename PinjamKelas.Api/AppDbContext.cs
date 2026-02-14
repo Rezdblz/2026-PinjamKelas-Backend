@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 namespace PinjamKelas.Api.Models
@@ -65,6 +66,26 @@ namespace PinjamKelas.Api.Models
                       .WithMany(c => c.StatusLogs)
                       .HasForeignKey(e => e.IdClassroom);
             });
+
+            // Configure soft delete globally
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                var parameter = Expression.Parameter(entity.ClrType);
+                var deletedProperty = entity.FindProperty("DeletedAt");
+                
+                if (deletedProperty != null)
+                {
+                    var filter = Expression.Lambda(
+                        Expression.Equal(
+                            Expression.Property(parameter, deletedProperty.PropertyInfo!),
+                            Expression.Constant(null)
+                        ),
+                        parameter
+                    );
+                    
+                    entity.SetQueryFilter(filter);
+                }
+            }
         }
     }
 }

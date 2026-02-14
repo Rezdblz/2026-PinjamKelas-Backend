@@ -2,9 +2,8 @@ using System;
 
 namespace PinjamKelas.Api.Models
 {
-    public class Post
+    public class Post : BaseEntity
     {
-        public int Id { get; set; }
         public required string Title { get; set; }
         public int IdUsers { get; set; }
         public int IdClassroom { get; set; }

@@ -2,9 +2,8 @@ using System.Collections.Generic;
 
 namespace PinjamKelas.Api.Models
 {
-    public class Classroom
+    public class Classroom : BaseEntity
     {
-        public int Id { get; set; }
         public string? ClassName { get; set; }
         public ClassroomStatus Status { get; set; }
 
