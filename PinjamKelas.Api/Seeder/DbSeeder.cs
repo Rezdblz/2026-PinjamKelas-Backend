@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using PinjamKelas.Api.Models;
+using BCrypt.Net;
 
 namespace PinjamKelas.Api.DbSeeder
 {
@@ -8,17 +9,33 @@ namespace PinjamKelas.Api.DbSeeder
     {
         public static void Seed(AppDbContext context)
         {
-            // Seed test user
-            if (!context.Users.Any())
+            if (context.Users.Any())
+                return;
+
+            var users = new List<User>
             {
-                context.Users.Add(new User
+                new User
                 {
-                    Username = "testuser",
-                    Role = "admin",
-                    CreatedAt = DateTime.UtcNow
-                });
-                context.SaveChanges();
-            }
+                    Username = "admin",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    Role = "Admin"
+                },
+                new User
+                {
+                    Username = "teacher",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("teacher123"),
+                    Role = "Teacher"
+                },
+                new User
+                {
+                    Username = "student",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
+                    Role = "Student"
+                }
+            };
+
+            context.Users.AddRange(users);
+            context.SaveChanges();
 
             // Seed classrooms
             if (!context.Classrooms.Any())

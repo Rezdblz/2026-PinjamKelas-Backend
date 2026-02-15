@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PinjamKelas.Api.Models;
 using PinjamKelas.Api.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PinjamKelas.Api.Controllers
 {
@@ -119,7 +120,7 @@ namespace PinjamKelas.Api.Controllers
                 return HandleException(ex);
             }
         }
-
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePost(int id, [FromBody] UpdatePostDto dto)
         {
@@ -163,7 +164,36 @@ namespace PinjamKelas.Api.Controllers
                 return HandleException(ex);
             }
         }
+        [Authorize(Roles ="Admin")]
+        [HttpPut("{id}/approval")]
+        public async Task<IActionResult> PostApproval(int id)
+        {
+            try
+            {
+                var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+                if (post == null)
+                    return NotFoundResponse("Post not found");
 
+                post.Status = PostStatus.Approved; // ensure this enum value exists
+                _context.Posts.Update(post);
+                await _context.SaveChangesAsync();
+
+                var updatedPost = await _context.Posts
+                    .Include(p => p.User)
+                    .Include(p => p.Classroom)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+
+                if (updatedPost == null)
+                    return BadRequest("Failed to retrieve updated post");
+
+                return SuccessResponse(MapToDto(updatedPost), "Post Status changed successfully");
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+        [Authorize(Roles ="Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(int id)
         {

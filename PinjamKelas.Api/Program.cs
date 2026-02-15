@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using PinjamKelas.Api;
 using PinjamKelas.Api.Models;
 using PinjamKelas.Api.DbSeeder;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +36,25 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add JWT Authentication
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "your-secret-key-min-32-characters";
+var jwtKey = Encoding.ASCII.GetBytes(jwtSecret);
+
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(jwtKey),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
+});
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -73,6 +95,10 @@ app.UseHttpsRedirection();
 
 // Use CORS
 app.UseCors("AllowLocalhost");
+
+// Use Authentication
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Map Controllers (ADD THIS)
 app.MapControllers();
