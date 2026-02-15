@@ -18,8 +18,16 @@ namespace PinjamKelas.Api.Controllers
         {
             try
             {
-                var posts = await _context.Posts.ToListAsync();
-                return Ok(posts);
+                var posts = await _context.Posts
+                    .Include(p => p.User)
+                    .Include(p => p.Classroom)
+                    .ToListAsync();
+
+                if (!posts.Any())
+                    return NotFoundResponse("No posts found");
+
+                var postDtos = posts.Select(p => MapToDto(p)).ToList();
+                return Ok(postDtos);
             }
             catch (Exception ex)
             {
@@ -32,11 +40,16 @@ namespace PinjamKelas.Api.Controllers
         {
             try
             {
-                var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+                var post = await _context.Posts
+                    .Include(p => p.User)
+                    .Include(p => p.Classroom)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+                
                 if (post == null)
                     return NotFoundResponse("Post not found");
 
-                return Ok(post);
+                var postDto = MapToDto(post);
+                return Ok(postDto);
             }
             catch (Exception ex)
             {
@@ -51,12 +64,15 @@ namespace PinjamKelas.Api.Controllers
             {
                 var posts = await _context.Posts
                     .Where(p => p.IdUsers == userId)
+                    .Include(p => p.User)
+                    .Include(p => p.Classroom)
                     .ToListAsync();
 
                 if (!posts.Any())
                     return NotFoundResponse("No posts found for this user");
 
-                return Ok(posts);
+                var postDtos = posts.Select(p => MapToDto(p)).ToList();
+                return Ok(postDtos);
             }
             catch (Exception ex)
             {
@@ -78,7 +94,7 @@ namespace PinjamKelas.Api.Controllers
                     IdUsers = dto.IdUsers,
                     IdClassroom = dto.IdClassroom,
                     Description = dto.Description,
-                    Status = Enum.Parse<PostStatus>(dto.Status),
+                    Status = (PostStatus)dto.Status,
                     CreatedAt = DateTime.UtcNow,
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime
@@ -87,7 +103,16 @@ namespace PinjamKelas.Api.Controllers
                 _context.Posts.Add(post);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetPost), new { id = post.Id }, post);
+                var createdPost = await _context.Posts
+                    .Include(p => p.User)
+                    .Include(p => p.Classroom)
+                    .FirstOrDefaultAsync(p => p.Id == post.Id);
+                
+                if (createdPost == null)
+                    return BadRequest("Failed to retrieve created post");
+
+                var postDto = MapToDto(createdPost);
+                return CreatedAtAction(nameof(GetPost), new { id = post.Id }, postDto);
             }
             catch (Exception ex)
             {
@@ -110,8 +135,8 @@ namespace PinjamKelas.Api.Controllers
                 if (!string.IsNullOrWhiteSpace(dto.Description))
                     post.Description = dto.Description;
 
-                if (!string.IsNullOrWhiteSpace(dto.Status))
-                    post.Status = Enum.Parse<PostStatus>(dto.Status);
+                if (dto.Status.HasValue)
+                    post.Status = (PostStatus)dto.Status.Value;
 
                 if (dto.StartTime.HasValue)
                     post.StartTime = dto.StartTime.Value;
@@ -122,7 +147,16 @@ namespace PinjamKelas.Api.Controllers
                 _context.Posts.Update(post);
                 await _context.SaveChangesAsync();
 
-                return SuccessResponse(post, "Post updated successfully");
+                var updatedPost = await _context.Posts
+                    .Include(p => p.User)
+                    .Include(p => p.Classroom)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+                
+                if (updatedPost == null)
+                    return BadRequest("Failed to retrieve updated post");
+
+                var postDto = MapToDto(updatedPost);
+                return SuccessResponse(postDto, "Post updated successfully");
             }
             catch (Exception ex)
             {
@@ -151,6 +185,33 @@ namespace PinjamKelas.Api.Controllers
             {
                 return HandleException(ex);
             }
+        }
+
+        private PostDto MapToDto(Post post)
+        {
+            return new PostDto
+            {
+                Id = post.Id,
+                Title = post.Title,
+                IdUsers = post.IdUsers,
+                IdClassroom = post.IdClassroom,
+                Description = post.Description,
+                Status = (int)post.Status,
+                CreatedAt = post.CreatedAt,
+                StartTime = post.StartTime,
+                EndTime = post.EndTime,
+                User = post.User != null ? new UserDto 
+                { 
+                    Id = post.User.Id, 
+                    Username = post.User.Username,
+                    Role = post.User.Role
+                } : null,
+                Classroom = post.Classroom != null ? new ClassroomDto 
+                { 
+                    Id = post.Classroom.Id, 
+                    ClassName = post.Classroom.ClassName
+                } : null
+            };
         }
     }
 }
