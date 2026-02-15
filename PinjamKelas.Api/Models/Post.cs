@@ -19,9 +19,9 @@ namespace PinjamKelas.Api.Models
 
     public enum PostStatus
     {
-        Pending,
-        Approved,
-        Rejected,
-        Completed
+        Pending = 0,
+        Approved = 1,
+        Rejected = 2,
+        Completed = 3
     }
 }
