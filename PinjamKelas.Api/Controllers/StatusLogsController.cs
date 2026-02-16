@@ -6,7 +6,7 @@ using PinjamKelas.Api.Dtos;
 
 namespace PinjamKelas.Api.Controllers
 {
-    [Authorize(Roles = "Admin")]
+
     public class StatusLogsController : BaseController
     {
         public StatusLogsController(AppDbContext context) : base(context)
@@ -22,6 +22,14 @@ namespace PinjamKelas.Api.Controllers
                 var statusLogs = await _context.StatusLogs
                     .Include(s => s.Classroom)
                     .OrderByDescending(s => s.LogTime)
+                    .Select(s => new StatusLogDto
+                    {
+                        Id = s.Id,
+                        IdClassroom = s.IdClassroom,
+                        Description = s.Description,
+                        LogTime = s.LogTime,
+                        ClassroomName = s.Classroom != null ? s.Classroom.ClassName : "Unknown"
+                    })
                     .ToListAsync();
 
                 return Ok(new 
@@ -32,7 +40,7 @@ namespace PinjamKelas.Api.Controllers
             }
             catch (Exception ex)
             {
-                return HandleException(ex);
+                return StatusCode(500, new { message = ex.Message });
             }
         }
     }

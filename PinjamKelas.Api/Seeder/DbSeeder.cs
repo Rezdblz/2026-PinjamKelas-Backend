@@ -16,7 +16,7 @@ namespace PinjamKelas.Api.DbSeeder
             {
                 new User
                 {
-                    Username = "admin",
+                    Username = "endmin",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
                     Role = "Admin"
                 },

@@ -13,10 +13,27 @@ namespace PinjamKelas.Api.Migrations
             migrationBuilder.Sql(@"
                 CREATE OR REPLACE FUNCTION log_classroom_status_change()
                 RETURNS TRIGGER AS $$
+                DECLARE
+                    old_status_text VARCHAR;
+                    new_status_text VARCHAR;
                 BEGIN
                     IF NEW.status <> OLD.status THEN
-                        INSERT INTO status_log (id_classroom, description, log_time)
-                        VALUES (NEW.id, 'Status changed from ' || OLD.status || ' to ' || NEW.status, NOW());
+                        old_status_text := CASE OLD.status
+                            WHEN 0 THEN 'Available'
+                            WHEN 1 THEN 'Unavailable'
+                            WHEN 2 THEN 'Maintenance'
+                            ELSE 'Unknown'
+                        END;
+
+                        new_status_text := CASE NEW.status
+                            WHEN 0 THEN 'Available'
+                            WHEN 1 THEN 'Unavailable'
+                            WHEN 2 THEN 'Maintenance'
+                            ELSE 'Unknown'
+                        END;
+
+                        INSERT INTO status_log (id_classroom, description, log_time, created_at)
+                        VALUES (NEW.id, 'Status changed from ' || old_status_text || ' to ' || new_status_text, NOW(), NOW());
                     END IF;
                     RETURN NEW;
                 END;
