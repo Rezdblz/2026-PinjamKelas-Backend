@@ -1,0 +1,6 @@
+@PinjamKelas.Api_HostAddress = http://localhost:5155
+
+GET {{PinjamKelas.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
