@@ -49,12 +49,12 @@ namespace PinjamKelas.Api.DbSeeder
                     new Classroom 
                     { 
                         ClassName = "B202", 
-                        Status = ClassroomStatus.Unavailable 
+                        Status = ClassroomStatus.Available 
                     },
                     new Classroom 
                     { 
                         ClassName = "C303", 
-                        Status = ClassroomStatus.Maintenance 
+                        Status = ClassroomStatus.Available 
                     }
                 );
                 context.SaveChanges();
