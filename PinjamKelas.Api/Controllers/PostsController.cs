@@ -193,7 +193,6 @@ namespace PinjamKelas.Api.Controllers
                 return HandleException(ex);
             }
         }
-        [Authorize(Roles ="Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(int id)
         {
